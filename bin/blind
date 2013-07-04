@@ -1,0 +1,200 @@
+#!/usr/bin/python2
+# -*- coding: utf-8 -*-
+import os
+from datetime import datetime
+
+import wx
+import wx.lib.agw.multidirdialog as MDD
+
+import blind
+
+
+class CoreFrame(wx.Frame):
+    def __init__(self, parent, id, title):
+        wx.Frame.__init__(self, parent, id, title)
+
+        self.status_bar = self.CreateStatusBar()
+        self.panel = wx.Panel(self)
+        self.vbox = wx.BoxSizer(wx.VERTICAL)
+
+        menu_bar = wx.MenuBar()
+        file_menu = wx.Menu()
+        quit_item = file_menu.Append(wx.ID_EXIT, 'Quit', 'Quit application')
+        menu_bar.Append(file_menu, '&File')
+        self.SetMenuBar(menu_bar)
+        self.Bind(wx.EVT_MENU, self.on_quit, quit_item)
+
+    def show(self):
+        self.panel.SetSizer(self.vbox)
+        self.vbox.Fit(self)
+        self.Show(True)
+
+    def flash_status_message(self, msg, flash_len_ms=1500):
+        self.status_bar.SetStatusText(msg)
+        self.timeroff = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.on_flash_status_off, self.timeroff)
+        self.timeroff.Start(flash_len_ms, oneShot=True)
+
+    def on_flash_status_off(self, event):
+        self.status_bar.SetStatusText('')
+
+    def on_quit(self, event):
+        self.Close()
+
+
+class OptionActionFrame(CoreFrame):
+    """Simple frame consisting of options and actions areas
+    """
+    def __init__(self, parent, id, title):
+        super(OptionActionFrame, self).__init__(parent, id, title)
+
+
+        self.options_box = wx.StaticBox(self.panel, -1, 'Options')
+        self.options_sizer = wx.StaticBoxSizer(self.options_box, wx.VERTICAL)
+
+        self.actions_box = wx.StaticBox(self.panel, -1, 'Actions')
+        self.actions_sizer = wx.StaticBoxSizer(self.actions_box, wx.HORIZONTAL)
+
+    def add_options(self, options):
+        self._add_elements_to_sizer(options, self.options_sizer)
+        self._add_sizer_to_vbox(self.options_sizer)
+
+    def add_actions(self, actions):
+        self._add_elements_to_sizer(actions, self.actions_sizer)
+        self._add_sizer_to_vbox(self.actions_sizer)
+
+    @staticmethod
+    def _add_elements_to_sizer(elements, sizer):
+        for elem in elements:
+            sizer.Add(elem)
+
+    def _add_sizer_to_vbox(self, sizer):
+        self.vbox.Add(sizer, 0, flag=wx.ALIGN_LEFT|wx.TOP)
+
+
+
+class BlinderApp(OptionActionFrame):
+
+    def __init__(self, parent, id, title):
+        self.files = []
+        self.file_map = {}
+        self.file_map_file = None
+        self.masker = blind.name_by_shuffled_numbers
+
+        super(BlinderApp, self).__init__(parent, id, title)
+
+        self.parent = parent
+
+        ## options
+        self.dir_cb = wx.CheckBox(self.panel, -1, 'Mask folders (instead of files)')
+        self.dir_cb.Bind(wx.EVT_CHECKBOX, self.toggle_dir_mask)
+
+        self.word_cb = wx.CheckBox(self.panel, -1, 'Mask with words (instead of numbers)')
+        self.word_cb.Bind(wx.EVT_CHECKBOX, self.toggle_word_mask)
+
+        self.add_options([self.dir_cb, self.word_cb])
+
+        ## actions
+        self.on_select_files = self.select_files
+        self.select_button = wx.Button(self.panel, -1, 'Select')
+        self.select_button.Bind(wx.EVT_BUTTON, lambda evt: self.on_select_files(evt))
+
+        self.mask_button = wx.Button(self.panel, -1, 'Mask')
+        self.mask_button.Bind(wx.EVT_BUTTON, self.mask)
+
+        self.unmask_button = wx.Button(self.panel, -1, 'Unmask')
+        self.unmask_button.Bind(wx.EVT_BUTTON, self.unmask)
+
+        self.add_actions([self.select_button, self.mask_button, self.unmask_button])
+
+        self.show()
+
+    def toggle_word_mask(self, event):
+        word_mask = event.GetEventObject().GetValue()
+        if word_mask:
+            self.masker = blind.name_by_random_fours
+            self.flash_status_message('Masking with words')
+        else:
+            self.masker = blind.name_by_shuffled_numbers
+            self.flash_status_message('Masking with numbers')
+
+    def toggle_dir_mask(self, event):
+        dir_mask = event.GetEventObject().GetValue()
+        if dir_mask:
+            self.on_select_files = self.select_directories
+            self.flash_status_message('Masking folders')
+        else:
+            self.on_select_files = self.select_files
+            self.flash_status_message('Masking files')
+
+    def select_directories(self, event):
+        dlg = MDD.MultiDirDialog(self, title='Choose directories',
+                                 message='', defaultPath=os.getcwd())
+        if dlg.ShowModal() == wx.ID_OK:
+            self.files = [clean_path(d) for d in dlg.GetPaths()]
+        dlg.Destroy()
+
+    def select_files(self, event):
+        dlg = wx.FileDialog(self, message='Choose files',
+                            defaultDir=os.getcwd(), defaultFile='',
+                            style=wx.OPEN|wx.MULTIPLE|wx.CHANGE_DIR)
+        if dlg.ShowModal() == wx.ID_OK:
+            self.files = [clean_path(d) for d in dlg.GetPaths()]
+        dlg.Destroy()
+
+    def mask(self, event, map_id=None):
+        """Mask files
+
+        `map_id` is the ID to append to blind map file. If None, date
+        and time are appended.
+        """
+        if not self.files:
+            self.flash_status_message('Select files first')
+            return
+
+        pwd = os.path.split(self.files[0])[0]
+        if map_id is None:
+            map_id = datetime.now().strftime('%Y%m%d-%H%M%S')
+        self.file_map_file = os.path.join(pwd,
+                                         'blind-map-{}.csv'.format(map_id))
+
+        self.file_map = blind.mask_files(self.files, self.masker)
+
+        self.flash_status_message('Masking files')
+        with open(self.file_map_file, 'w') as ofh:
+            blind.write_map(self.file_map, ofh)
+
+        ## reset
+        self.files = []
+
+    def unmask(self, event):
+        if not self.file_map:
+             self._get_file_map_from_file()
+        blind.unmask_files(self.file_map)
+
+        self.flash_status_message('Unmasking files')
+
+        ## reset
+        self.file_map = {}
+        self.file_map_file = None
+
+    def _get_file_map_from_file(self):
+        dlg = wx.FileDialog(self, message='Choose blind file mapping',
+                            defaultDir=os.getcwd(), defaultFile='',
+                            style=wx.OPEN|wx.CHANGE_DIR)
+        if dlg.ShowModal() == wx.ID_OK:
+            self.file_map_file = dlg.GetPath()
+            self.file_map = blind.read_map(open(self.file_map_file))
+        dlg.Destroy()
+
+
+def clean_path(d):
+    if 'HOME' in os.environ:
+        d = d.replace('Home directory', os.environ['HOME'])
+    return d
+
+
+if __name__ == '__main__':
+    app = wx.App(False)
+    BlinderApp(None, wx.ID_ANY, 'Blind files')
+    app.MainLoop()
