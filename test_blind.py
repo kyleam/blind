@@ -4,6 +4,10 @@ from StringIO import StringIO
 
 import blind
 
+@pytest.fixture
+def file_map():
+    return {'one.txt': 'one.txt.masked', 'two.txt': 'two.txt.masked'}
+
 ## _get_path_and_extension
 
 
@@ -99,6 +103,7 @@ def test_name_by_random_fours_two_files_with_path(shuffle):
 
 ## write_map
 
+
 def test_get_map_filename():
     files = ['one.txt', 'two.txt']
     result = blind._get_map_filename(files, map_id='3')
@@ -111,13 +116,12 @@ def test_get_map_filename_with_path():
     assert result == '/a/path/blind-map-3.csv'
 
 
-def test_write_map():
-    file_map = {'one.txt': 'mask1.txt', 'two.txt': 'mask2.txt'}
+def test_write_map(file_map):
     ofh = StringIO()
     blind._write_map(file_map, ofh)
     result = ofh.getvalue()
-    assert 'one.txt,mask1.txt' in result
-    assert 'two.txt,mask2.txt' in result
+    assert 'one.txt,one.txt.masked' in result
+    assert 'two.txt,two.txt.masked' in result
 
 
 ## read_map
@@ -132,25 +136,42 @@ def test_read_map():
 ## mask_files
 
 
-def test_mask():
+def test_create_map():
     def masker(files):
         for f in files:
             yield f, f + '.masked'
 
-    with mock.patch('os.rename') as rename:
-        files = ['one.txt', 'two.txt']
-        result = blind._mask(files, masker)
-        rename.assert_any_call('one.txt', 'one.txt.masked')
-        rename.assert_any_call('two.txt', 'two.txt.masked')
+    files = ['one.txt', 'two.txt']
+    result = blind._create_map(files, masker)
     assert result['one.txt'] == 'one.txt.masked'
     assert result['two.txt'] == 'two.txt.masked'
+
+def test_mask(file_map):
+    with mock.patch('os.rename') as rename:
+        result = blind._mask(file_map)
+        rename.assert_any_call('one.txt', 'one.txt.masked')
+        rename.assert_any_call('two.txt', 'two.txt.masked')
+
+
+def test_collision_check(file_map):
+    with mock.patch('os.path.exists') as exists:
+        exists.return_value = False
+        result = blind._collision_check(file_map)
+        exists.assert_any_call('one.txt.masked')
+        exists.assert_any_call('two.txt.masked')
+
+
+def test_collision_check_raises(file_map):
+    with mock.patch('os.path.exists') as exists:
+        exists.return_value = True
+        with pytest.raises(blind.ConflictError):
+            result = blind._collision_check(file_map)
 
 
 ## unmask files
 
 
-def test_unmask():
-    file_map = {'one.txt': 'one.txt.masked', 'two.txt': 'two.txt.masked'}
+def test_unmask(file_map):
     with mock.patch('os.rename') as rename:
         blind._unmask(file_map)
         rename.assert_any_call('one.txt.masked', 'one.txt')

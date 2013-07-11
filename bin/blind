@@ -15,6 +15,8 @@ Options
   -n, --numbers        mask with numbers instead of four-letter words
 """
 from docopt import docopt
+import textwrap
+
 import blind
 
 
@@ -26,8 +28,10 @@ if __name__ == '__main__':
             masker = blind.name_by_shuffled_numbers
         else:
             masker = blind.name_by_random_fours
-
-        blind_map = blind.mask(args['OBJECT'], masker)
-        print("Blind map saved to {}".format(blind_map))
+        try:
+            blind_map = blind.mask(args['OBJECT'], masker)
+            print("Blind map saved to {}".format(blind_map))
+        except blind.ConflictError:
+            print(textwrap.fill(blind._conflict_message))
     elif args['unmask']:
         blind.unmask(args['MAP'])

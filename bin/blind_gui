@@ -2,6 +2,7 @@
 #; -*- mode: Python;-*-
 import os
 from datetime import datetime
+import textwrap
 
 import wx
 import wx.lib.agw.multidirdialog as MDD
@@ -148,10 +149,19 @@ class BlinderApp(OptionActionFrame):
             return
 
         self.flash_status_message('Masking files')
-        self.file_map = blind.mask(self.files, self.masker)
+        try:
+            self.file_map = blind.mask(self.files, self.masker)
+        except blind.ConflictError:
+            self.on_conflict()
 
         ## reset
         self.files = []
+
+    def on_conflict(self):
+        dial = wx.MessageDialog(None,
+                                textwrap.fill(blind._conflict_message, 60),
+                                'Error', wx.OK | wx.ICON_ERROR)
+        dial.ShowModal()
 
     def unmask(self, event):
         if not self.file_map:

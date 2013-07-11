@@ -71,7 +71,9 @@ def mask(files, masker):
 
     Returns name of the blind map file.
     """
-    file_map = _mask(files, masker)
+    file_map = _create_map(files, masker)
+    _collision_check(file_map)
+    _mask(file_map)
 
     file_map_file = _get_map_filename(files)
     with open(file_map_file, 'w') as ofh:
@@ -79,12 +81,41 @@ def mask(files, masker):
     return file_map_file
 
 
-def _mask(files, masker):
+def _create_map(files, masker):
     file_map = {}
     for original, masked in masker(files):
-        os.rename(original, masked)
         file_map[original] = masked
     return file_map
+
+
+def _collision_check(file_map):
+    """Check that masked file names don't conflict with existing files in
+    directories
+    """
+    for masked in file_map.values():
+        if os.path.exists(masked):
+            raise ConflictError('{} already exists'.format(masked))
+
+
+class ConflictError(Exception):
+    pass
+
+
+_conflict_message = ('Attempted to rename files, '
+                     'but there was a renaming conflict. '
+                     'If you are masking with words, '
+                     'this is an unlikely conflict '
+                     '(assuming you don\'t have a large number '
+                     'of four-letter names in this directory), '
+                     'so try again. '
+                     'If you are masking with numbers, '
+                     'check if any files in the directory '
+                     'consist of just numbers.')
+
+
+def _mask(file_map):
+    for original, masked in file_map.items():
+        os.rename(original, masked)
 
 
 def _get_map_filename(files, map_id=None):
