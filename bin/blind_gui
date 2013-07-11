@@ -79,7 +79,7 @@ class BlinderApp(OptionActionFrame):
         self.files = []
         self.file_map = {}
         self.file_map_file = None
-        self.masker = blind.name_by_shuffled_numbers
+        self.masker = blind.name_by_random_fours
 
         super(BlinderApp, self).__init__(parent, id, title)
 
@@ -89,7 +89,7 @@ class BlinderApp(OptionActionFrame):
         self.dir_cb = wx.CheckBox(self.panel, -1, 'Mask folders (instead of files)')
         self.dir_cb.Bind(wx.EVT_CHECKBOX, self.toggle_dir_mask)
 
-        self.word_cb = wx.CheckBox(self.panel, -1, 'Mask with words (instead of numbers)')
+        self.word_cb = wx.CheckBox(self.panel, -1, 'Mask with numbers (instead of words)')
         self.word_cb.Bind(wx.EVT_CHECKBOX, self.toggle_word_mask)
 
         self.add_options([self.dir_cb, self.word_cb])
@@ -110,13 +110,13 @@ class BlinderApp(OptionActionFrame):
         self.show()
 
     def toggle_word_mask(self, event):
-        word_mask = event.GetEventObject().GetValue()
-        if word_mask:
-            self.masker = blind.name_by_random_fours
-            self.flash_status_message('Masking with words')
-        else:
+        number_mask = event.GetEventObject().GetValue()
+        if number_mask:
             self.masker = blind.name_by_shuffled_numbers
             self.flash_status_message('Masking with numbers')
+        else:
+            self.flash_status_message('Masking with words')
+            self.masker = blind.name_by_random_fours
 
     def toggle_dir_mask(self, event):
         dir_mask = event.GetEventObject().GetValue()

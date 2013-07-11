@@ -12,7 +12,7 @@ Arguments:
 Options
   -h, --help
   -v, --version
-  -w, --words          mask with four-letter words instead of numbers
+  -n, --numbers        mask with numbers instead of four-letter words
 """
 from docopt import docopt
 import blind
@@ -22,10 +22,10 @@ if __name__ == '__main__':
     args = docopt(__doc__, version=blind.__version__)
 
     if args['mask']:
-        if args['--words']:
-            masker = blind.name_by_random_fours
-        else:
+        if args['--numbers']:
             masker = blind.name_by_shuffled_numbers
+        else:
+            masker = blind.name_by_random_fours
 
         blind_map = blind.mask(args['OBJECT'], masker)
         print("Blind map saved to {}".format(blind_map))
