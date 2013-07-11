@@ -7,9 +7,44 @@ This is useful in a research setting, where quantification of the
 results should not be influenced by knowledge of the experimental
 condition.
 
+For example, if you had these files::
+
+  .
+  |_ condition-1.txt
+  |_ condition-2.txt
+  |_ control-1.txt
+  |_ control-2.txt
+
+Masking them would result in::
+
+  .
+  |_ glim.txt
+  |_ irks.txt
+  |_ tabu.txt
+  |_ waur.txt
+
+Following analyses, they can then be unmasked to the original file
+names.
+
+
 Dependencies and installation
 =============================
 
 The blind GUI depends on wxPython, including the wx.lib.agw, and the
 command line script depends on docopt. Tests require pytest. blind can
-be installed with `python setup.py install` or similar.
+be installed with ``python setup.py install`` or similar.
+
+I created the GUI for a person that is using Window (without a python
+install), so I'ved used pyinstaller_ to bundle the program in a
+stand-alone exe. The lastest version can be downloaded from here_.
+
+
+Blinding files
+==============
+
+Run ``blind --help`` from the command line for instructions.
+
+If you prefer a GUI, you can run ``blind_gui``.
+
+.. _pyinstaller: http://www.pyinstaller.org/
+.. _here: https://www.dropbox.com/sh/579ot10oqnte90q/kSEPmSfz8M
