@@ -158,10 +158,10 @@ class BlinderApp(OptionActionFrame):
         self.files = []
 
     def on_conflict(self):
-        dial = wx.MessageDialog(None,
-                                textwrap.fill(blind._conflict_message, 60),
-                                'Error', wx.OK | wx.ICON_ERROR)
-        dial.ShowModal()
+        dlg = wx.MessageDialog(None,
+                               textwrap.fill(blind._conflict_message, 60),
+                               'Error', wx.OK | wx.ICON_ERROR)
+        dlg.ShowModal()
 
     def unmask(self, event):
         if not self.file_map:
