@@ -13,7 +13,7 @@ setup(
     url='http://github.com/kyleam/blind.git',
     py_modules=['blind', 'four_letters'],
     scripts=['bin/blind', 'bin/blind_gui'],
-    long_description=open('README').read(),
+    long_description=open('README.rst').read(),
     requires=['wxPython', 'docopt'],
     classifiers=[
         'Development Status :: 4 - Beta',
