@@ -8,7 +8,7 @@ from datetime import datetime
 
 from four_letters import fours
 
-__version__ = '0.9.0'
+__version__ = '0.9.1'
 
 
 def name_by_shuffled_numbers(files):
