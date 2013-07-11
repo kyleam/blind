@@ -1,5 +1,5 @@
 #!/usr/bin/python2
-# -*- coding: utf-8 -*-
+#; -*- mode: Python;-*-
 import os
 from datetime import datetime
 
@@ -142,49 +142,33 @@ class BlinderApp(OptionActionFrame):
             self.files = [clean_path(d) for d in dlg.GetPaths()]
         dlg.Destroy()
 
-    def mask(self, event, map_id=None):
-        """Mask files
-
-        `map_id` is the ID to append to blind map file. If None, date
-        and time are appended.
-        """
+    def mask(self, event):
         if not self.files:
             self.flash_status_message('Select files first')
             return
 
-        pwd = os.path.split(self.files[0])[0]
-        if map_id is None:
-            map_id = datetime.now().strftime('%Y%m%d-%H%M%S')
-        self.file_map_file = os.path.join(pwd,
-                                         'blind-map-{}.csv'.format(map_id))
-
-        self.file_map = blind.mask_files(self.files, self.masker)
-
         self.flash_status_message('Masking files')
-        with open(self.file_map_file, 'w') as ofh:
-            blind.write_map(self.file_map, ofh)
+        self.file_map = blind.mask(self.files, self.masker)
 
         ## reset
         self.files = []
 
     def unmask(self, event):
         if not self.file_map:
-             self._get_file_map_from_file()
-        blind.unmask_files(self.file_map)
+             self._get_file_map()
+        blind.unmask(self.file_map)
 
         self.flash_status_message('Unmasking files')
 
         ## reset
-        self.file_map = {}
-        self.file_map_file = None
+        self.file_map = None
 
-    def _get_file_map_from_file(self):
+    def _get_file_map(self):
         dlg = wx.FileDialog(self, message='Choose blind file mapping',
                             defaultDir=os.getcwd(), defaultFile='',
                             style=wx.OPEN|wx.CHANGE_DIR)
         if dlg.ShowModal() == wx.ID_OK:
-            self.file_map_file = dlg.GetPath()
-            self.file_map = blind.read_map(open(self.file_map_file))
+            self.file_map = dlg.GetPath()
         dlg.Destroy()
 
 

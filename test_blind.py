@@ -99,11 +99,22 @@ def test_name_by_random_fours_two_files_with_path(shuffle):
 
 ## write_map
 
+def test_get_map_filename():
+    files = ['one.txt', 'two.txt']
+    result = blind._get_map_filename(files, map_id='3')
+    assert result == 'blind-map-3.csv'
+
+
+def test_get_map_filename_with_path():
+    files = ['/a/path/one.txt', '/a/path/two.txt']
+    result = blind._get_map_filename(files, map_id='3')
+    assert result == '/a/path/blind-map-3.csv'
+
 
 def test_write_map():
     file_map = {'one.txt': 'mask1.txt', 'two.txt': 'mask2.txt'}
     ofh = StringIO()
-    blind.write_map(file_map, ofh)
+    blind._write_map(file_map, ofh)
     result = ofh.getvalue()
     assert 'one.txt,mask1.txt' in result
     assert 'two.txt,mask2.txt' in result
@@ -114,21 +125,21 @@ def test_write_map():
 
 def test_read_map():
     ifh = StringIO('one.txt,mask1.txt\r\ntwo.txt,mask2.txt\r\n')
-    result = blind.read_map(ifh)
+    result = blind._read_map(ifh)
     assert result == {'one.txt': 'mask1.txt', 'two.txt': 'mask2.txt'}
 
 
 ## mask_files
 
 
-def test_mask_files():
+def test_mask():
     def masker(files):
         for f in files:
             yield f, f + '.masked'
 
     with mock.patch('os.rename') as rename:
         files = ['one.txt', 'two.txt']
-        result = blind.mask_files(files, masker)
+        result = blind._mask(files, masker)
         rename.assert_any_call('one.txt', 'one.txt.masked')
         rename.assert_any_call('two.txt', 'two.txt.masked')
     assert result['one.txt'] == 'one.txt.masked'
@@ -138,9 +149,9 @@ def test_mask_files():
 ## unmask files
 
 
-def test_unmask_files():
+def test_unmask():
     file_map = {'one.txt': 'one.txt.masked', 'two.txt': 'two.txt.masked'}
     with mock.patch('os.rename') as rename:
-        blind.unmask_files(file_map)
+        blind._unmask(file_map)
         rename.assert_any_call('one.txt.masked', 'one.txt')
         rename.assert_any_call('two.txt.masked', 'two.txt')

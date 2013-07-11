@@ -1,7 +1,10 @@
+"""Library for masking and unmasking file names
+"""
 import sys
 import os
 import csv
 import random
+from datetime import datetime
 
 from four_letters import fours
 
@@ -57,33 +60,26 @@ def _get_path_and_extension(f):
     return path, ext
 
 
-def write_map(file_map, ofh):
-    """Write `file_map` to `ofh` in format of "original, masked" rows
-    """
-    writer = csv.writer(ofh)
-    for original, masked in file_map.items():
-        writer.writerow([original, masked])
-
-
-def read_map(ifh):
-    """Read original-masked mapping from `ifh`
-
-    Each row of `ifh` should have a comma-delimited pair of original and
-    masked file names
-    """
-    reader = csv.reader(ifh)
-    return {original: masked for original, masked in reader}
-
-
-def mask_files(files, masker):
+def mask(files, masker):
     """Mask `files` with `masker`
 
     `masker` should be a function that produces an iterable providing
     the original file name and the masked file name
 
-    Returns dictionary that maps the original file names to the sha1
-    file names.
+    Writes file "blind-map-*.csv" that associates the original file
+    names to the masked file names.
+
+    Returns name of the blind map file.
     """
+    file_map = _mask(files, masker)
+
+    file_map_file = _get_map_filename(files)
+    with open(file_map_file, 'w') as ofh:
+        _write_map(file_map, ofh)
+    return file_map_file
+
+
+def _mask(files, masker):
     file_map = {}
     for original, masked in masker(files):
         os.rename(original, masked)
@@ -91,13 +87,46 @@ def mask_files(files, masker):
     return file_map
 
 
-def unmask_files(file_map):
-    """Unmask files by renaming them back to the original file name provided
-    by `file_map`.
+def _get_map_filename(files, map_id=None):
+    """Generate blind map file name for `files`
 
-    `file_map` is a dictionary with the original file names as keys and
-    the masked file names as values. In almost all cases, this would have
-    come from `mask_files`.
+    `map_id` is the ID to append to blind map file. If None, date
+    and time are appended.
     """
+    if map_id is None:
+        map_id = datetime.now().strftime('%Y%m%d-%H%M%S')
+    pwd = os.path.split(files[0])[0]
+    return os.path.join(pwd, 'blind-map-{}.csv'.format(map_id))
+
+
+def _write_map(file_map, ofh):
+    """Write `file_map` to `ofh` in format of "original, masked" rows
+    """
+    writer = csv.writer(ofh)
+    for original, masked in file_map.items():
+        writer.writerow([original, masked])
+
+
+def unmask(blind_map):
+    """Unmask files by renaming them back to the original file name provided
+    by `blind_map`.
+
+    `blind_map` is the name of the file mapping the masked file names to
+    the original file names as keys and the masked file names.
+    """
+    _unmask(_read_map(open(blind_map)))
+
+
+def _unmask(file_map):
     for original, masked in file_map.items():
         os.rename(masked, original)
+
+
+def _read_map(ifh):
+    """Read original-masked mapping from `ifh`
+
+    Each row of `ifh` should have a comma-delimited pair of original and
+    masked file names
+    """
+    reader = csv.reader(ifh)
+    return {original: masked for original, masked in reader}
