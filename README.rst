@@ -15,7 +15,8 @@ For example, if you had these files::
   |_ control-1.txt
   |_ control-2.txt
 
-Masking them would result in::
+Masking them (with randomly selected four-letter words) could result
+in::
 
   .
   |_ glim.txt
