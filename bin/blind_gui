@@ -21,9 +21,16 @@ class CoreFrame(wx.Frame):
         menu_bar = wx.MenuBar()
         file_menu = wx.Menu()
         quit_item = file_menu.Append(wx.ID_EXIT, 'Quit', 'Quit application')
+
+        help_menu = wx.Menu()
+        about_item = help_menu.Append(wx.ID_HELP, 'About', 'About')
+
         menu_bar.Append(file_menu, '&File')
+        menu_bar.Append(help_menu, '&Help')
+
         self.SetMenuBar(menu_bar)
         self.Bind(wx.EVT_MENU, self.on_quit, quit_item)
+        self.Bind(wx.EVT_MENU, self.on_about, about_item)
 
     def show(self):
         self.panel.SetSizer(self.vbox)
@@ -41,6 +48,17 @@ class CoreFrame(wx.Frame):
 
     def on_quit(self, event):
         self.Close()
+
+    def on_about(self, event):
+        info = wx.AboutDialogInfo()
+        info.SetName('blind')
+        info.SetDescription('Temporarily mask file or directory names')
+        info.SetVersion(blind.__version__)
+        info.SetWebSite(('https://github.com/kyleam/blind', 'source'))
+        info.SetLicense('GPLv3\n'
+                        'http://www.gnu.org/licenses/gpl-3.0.txt')
+        info.AddDeveloper('Kyle Meyer')
+        wx.AboutBox(info)
 
 
 class OptionActionFrame(CoreFrame):
