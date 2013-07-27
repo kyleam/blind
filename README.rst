@@ -31,9 +31,9 @@ names.
 Dependencies and installation
 =============================
 
-The blind GUI depends on wxPython, including the wx.lib.agw, and the
-command line script depends on docopt. Tests require pytest. blind can
-be installed with ``python setup.py install`` or similar.
+The blind GUI depends on wxPython, including wx.lib.agw, and the command
+line script depends on docopt. Tests require pytest. blind can be
+installed with ``python setup.py install`` or similar.
 
 I created the GUI for a person that is using Window (without a python
 install), so I'ved used pyinstaller_ to bundle the program in a
