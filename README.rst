@@ -37,7 +37,10 @@ installed with ``python setup.py install`` or similar.
 
 I created the GUI for a person that is using Windows (without a python
 install), so I'ved used pyinstaller_ to bundle the program in a
-stand-alone exe. The lastest version can be downloaded from here_.
+stand-alone exe. The lastest version can be downloaded from here_. If
+you think this program would be of use to you, but you are using OS X
+and are not comfortable with Python, contact me and I'll try to do
+similar for OS X.
 
 
 Blinding files
