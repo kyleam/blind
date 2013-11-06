@@ -7,7 +7,7 @@ setup(
     name='blind',
     version=__version__,
     author='Kyle Meyer',
-    author_email='meyerkya@gmail.com',
+    author_email='kyle@kyleam.com',
     description='Temporarily mask file or directory names',
     license='GPLv3',
     url='http://github.com/kyleam/blind.git',
