@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 #; -*- mode: Python;-*-
-"""Blind files or directoires
+"""Blind files or directories
 
 Usage:
   blind [options] mask OBJECT OBJECT [OBJECT ...]
