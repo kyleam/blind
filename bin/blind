@@ -9,7 +9,8 @@ Usage:
 Arguments:
   OBJECT               file or directory to mask
   MAP                  file mapping original files to masked files
-Options
+
+Options:
   -h, --help
   -v, --version
   -n, --numbers        mask with numbers instead of four-letter words
