@@ -7,7 +7,7 @@ This is useful in a research setting, where quantification of the
 results should not be influenced by knowledge of the experimental
 condition.
 
-For example, if you had these files::
+For example, suppose you had these files::
 
   .
   |_ condition-1.txt
@@ -16,7 +16,9 @@ For example, if you had these files::
   |_ control-2.txt
 
 Masking them (with randomly selected four-letter words) could result
-in::
+in
+
+::
 
   .
   |_ glim.txt
@@ -24,8 +26,7 @@ in::
   |_ tabu.txt
   |_ waur.txt
 
-Following analyses, they can then be unmasked to the original file
-names.
+Following analyses, they can be unmasked to the original file names.
 
 
 Dependencies and installation
@@ -36,7 +37,7 @@ line script depends on docopt. Tests require pytest. blind can be
 installed with ``python setup.py install`` or similar.
 
 I created the GUI for a person that is using Windows (without a python
-install), so I'ved used pyinstaller_ to bundle the program in a
+install), so I'ved used pyinstaller_ to bundle the program as a
 stand-alone exe. The lastest version can be downloaded from here_. If
 you think this program would be of use to you, but you are using OS X
 and are not comfortable with Python, contact me and I'll try to do
