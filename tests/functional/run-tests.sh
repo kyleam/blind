@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-## Run functional tests
+## Run functional tests.
 
 ## The input files are tracked by git, so any changes to their original
-## content will be shown
+## content will be shown.
 
 inputdir=test-input
 files=($(ls "$inputdir"/file*txt))

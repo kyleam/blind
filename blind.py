@@ -13,7 +13,7 @@ __version__ = '0.9.1'
 
 def name_by_shuffled_numbers(files):
     """Return generator that provides original file name and a file name
-    drawn from the range of the number of files
+    drawn from the range of the number of files.
 
     For example, files ['one.txt', 'two.txt', 'three.txt'] could yield
 
@@ -36,7 +36,7 @@ def name_by_shuffled_numbers(files):
 
 def name_by_random_fours(files):
     """Return generator that provides original file name and a file name
-    drawn from four letter words
+    drawn from four letter words.
 
     For example, files ['one.txt', 'two.txt', 'three.txt'] could yield
 
@@ -54,17 +54,17 @@ def name_by_random_fours(files):
 
 
 def _get_path_and_extension(f):
-    """/path/to/file.ext -> (/path/to, .ext)"""
+    """Return the path and extension for file `f`."""
     path = os.path.split(f)[0]
     ext = os.path.splitext(f)[1]
     return path, ext
 
 
 def mask(files, masker):
-    """Mask `files` with `masker`
+    """Mask `files` with `masker`.
 
     `masker` should be a function that produces an iterable providing
-    the original file name and the masked file name
+    the original file name and the masked file name.
 
     Writes file "blind-map-*.csv" that associates the original file
     names to the masked file names.
@@ -90,7 +90,7 @@ def _create_map(files, masker):
 
 def _collision_check(file_map):
     """Check that masked file names don't conflict with existing files in
-    directories
+    directories.
     """
     for masked in file_map.values():
         if os.path.exists(masked):
@@ -119,7 +119,7 @@ def _mask(file_map):
 
 
 def _get_map_filename(files, map_id=None):
-    """Generate blind map file name for `files`
+    """Generate blind map file name for `files`.
 
     `map_id` is the ID to append to blind map file. If None, date
     and time are appended.
@@ -131,7 +131,7 @@ def _get_map_filename(files, map_id=None):
 
 
 def _write_map(file_map, ofh):
-    """Write `file_map` to `ofh` in format of "original, masked" rows
+    """Write `file_map` to `ofh` in format of "original, masked" rows.
     """
     writer = csv.writer(ofh)
     for original, masked in file_map.items():
@@ -154,10 +154,10 @@ def _unmask(file_map):
 
 
 def _read_map(ifh):
-    """Read original-masked mapping from `ifh`
+    """Read original-masked mapping from `ifh`.
 
     Each row of `ifh` should have a comma-delimited pair of original and
-    masked file names
+    masked file names.
     """
     reader = csv.reader(ifh)
     return {original: masked for original, masked in reader}

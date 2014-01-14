@@ -8,7 +8,7 @@ setup(
     version=__version__,
     author='Kyle Meyer',
     author_email='kyle@kyleam.com',
-    description='Temporarily mask file or directory names',
+    description='Temporarily mask file or directory names.',
     license='GPLv3',
     url='http://github.com/kyleam/blind.git',
     py_modules=['blind', 'four_letters'],
