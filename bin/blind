@@ -20,19 +20,17 @@ import textwrap
 
 import blind
 
+args = docopt(__doc__, version=blind.__version__)
 
-if __name__ == '__main__':
-    args = docopt(__doc__, version=blind.__version__)
-
-    if args['mask']:
-        if args['--numbers']:
-            masker = blind.name_by_shuffled_numbers
-        else:
-            masker = blind.name_by_random_fours
-        try:
-            blind_map = blind.mask(args['OBJECT'], masker)
-            print("Blind map saved to {}".format(blind_map))
-        except blind.ConflictError:
-            print(textwrap.fill(blind._conflict_message))
-    elif args['unmask']:
-        blind.unmask(args['MAP'])
+if args['mask']:
+    if args['--numbers']:
+        masker = blind.name_by_shuffled_numbers
+    else:
+        masker = blind.name_by_random_fours
+    try:
+        blind_map = blind.mask(args['OBJECT'], masker)
+        print("Blind map saved to {}".format(blind_map))
+    except blind.ConflictError:
+        print(textwrap.fill(blind._conflict_message))
+elif args['unmask']:
+    blind.unmask(args['MAP'])
